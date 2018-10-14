@@ -15,12 +15,17 @@ import com.heady.ecommerce.example.model.Category;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by ayyazkhan on 14/10/18.
  */
 
 public class ChildCategoryAdapter extends BaseExpandableListAdapter {
 
+    @BindView(R.id.textViewCategoryName)
+    TextView textView_catName;
     private Context context;
     private LayoutInflater inflater;
     private ArrayList<Category> categories;
@@ -45,7 +50,8 @@ public class ChildCategoryAdapter extends BaseExpandableListAdapter {
     public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         convertView = inflater.inflate(R.layout.category_item_row, parent, false);
-        TextView textView_catName = convertView.findViewById(R.id.textViewCategoryName);
+        ButterKnife.bind(this, convertView);
+
         Category current = categories.get(groupPosition).getCategories().get(childPosition);
         textView_catName.setText("      " + current.getName());
 
@@ -85,7 +91,8 @@ public class ChildCategoryAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         convertView = inflater.inflate(R.layout.category_item_row, parent, false);
-        TextView textView_catName = convertView.findViewById(R.id.textViewCategoryName);
+        ButterKnife.bind(this, convertView);
+
         Category current = categories.get(groupPosition);
         textView_catName.setText("  " + current.getName());
         textView_catName.setTypeface(null, Typeface.BOLD);
