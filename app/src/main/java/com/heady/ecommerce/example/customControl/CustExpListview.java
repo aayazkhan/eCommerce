@@ -16,8 +16,8 @@ public class CustExpListview extends ExpandableListView {
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        widthMeasureSpec = MeasureSpec.makeMeasureSpec(900, MeasureSpec.AT_MOST);
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(900, MeasureSpec.AT_MOST);
+        widthMeasureSpec = MeasureSpec.makeMeasureSpec(1200, MeasureSpec.AT_MOST);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(1200, MeasureSpec.AT_MOST);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }
