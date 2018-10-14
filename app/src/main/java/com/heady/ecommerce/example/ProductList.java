@@ -8,21 +8,26 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import com.heady.ecommerce.example.adapter.ProductAdapter;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
 import com.heady.ecommerce.example.model.Product;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 
 public class ProductList extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.textSearch)
+    EditText editsearch;
     @BindView(R.id.list)
     RecyclerView list;
     private Unbinder unbinder;
@@ -66,6 +71,12 @@ public class ProductList extends AppCompatActivity {
             list.setAdapter(adapter);
 
         }
+    }
+
+    @OnTextChanged(R.id.textSearch)
+    public void ontextSearch() {
+        String text = editsearch.getText().toString().toLowerCase(Locale.ENGLISH);
+        adapter.filter(text);
     }
 
     @Override
