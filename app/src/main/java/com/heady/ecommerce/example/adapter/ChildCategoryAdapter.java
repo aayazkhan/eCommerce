@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.heady.ecommerce.example.ProductDetail;
 import com.heady.ecommerce.example.ProductList;
 import com.heady.ecommerce.example.R;
 import com.heady.ecommerce.example.model.Category;
@@ -58,10 +59,16 @@ public class ChildCategoryAdapter extends BaseExpandableListAdapter {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ProductList.class);
-                intent.putExtra("title", categories.get(groupPosition).getCategories().get(childPosition).getName());
-                intent.putExtra("products", categories.get(groupPosition).getCategories().get(childPosition).getProducts());
-                context.startActivity(intent);
+                if (categories.get(groupPosition).getCategories().get(childPosition).getProducts().size() > 1) {
+                    Intent intent = new Intent(context, ProductList.class);
+                    intent.putExtra("title", categories.get(groupPosition).getCategories().get(childPosition).getName());
+                    intent.putExtra("products", categories.get(groupPosition).getCategories().get(childPosition).getProducts());
+                    context.startActivity(intent);
+                } else {
+                    Intent intent = new Intent(context, ProductDetail.class);
+                    intent.putExtra("product", categories.get(groupPosition).getCategories().get(childPosition).getProducts().get(0));
+                    context.startActivity(intent);
+                }
             }
         });
 

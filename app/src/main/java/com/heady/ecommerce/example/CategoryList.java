@@ -8,10 +8,8 @@ import android.widget.ExpandableListView;
 
 import com.heady.ecommerce.example.adapter.ParentCategoryAdapter;
 import com.heady.ecommerce.example.model.Category;
-import com.heady.ecommerce.example.model.category.SortCategorybyChild;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,7 +21,7 @@ public class CategoryList extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.expandableListView_categories)
     ExpandableListView expandableListViewCategories;
-    ArrayList<Category> categories, list;
+    ArrayList<Category> categories;
     private Unbinder unbinder;
 
     @Override
@@ -41,61 +39,12 @@ public class CategoryList extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             categories = (ArrayList<Category>) savedInstanceState.get("catagory");
-            list = new ArrayList<Category>();
-            list.addAll(categories);
 
-            Collections.sort(list, new SortCategorybyChild("ASC"));
-
-            ArrayList<Category> tmpList = getCategory(list);
-
-//            CategoryAdapter adapter = new CategoryAdapter(CategoryList.this, tmpList);
-            ParentCategoryAdapter adapter = new ParentCategoryAdapter(CategoryList.this, tmpList);
+            ParentCategoryAdapter adapter = new ParentCategoryAdapter(CategoryList.this, categories);
 
             expandableListViewCategories.setAdapter(adapter);
 
         }
-
-    }
-
-    private ArrayList<Category> getCategory(ArrayList<Category> tmpCategories) {
-
-        try {
-            for (int i = 0; i < tmpCategories.size(); i++) {
-                boolean flag = false;
-
-                for (int j = 0; j < tmpCategories.size(); j++) {
-
-                    for (int k = 0; k < tmpCategories.get(j).getChildCategories().size(); k++) {
-                        Long iID = tmpCategories.get(i).getId();
-                        Long kID = tmpCategories.get(j).getChildCategories().get(k);
-
-                        if (String.valueOf(iID).equals(String.valueOf(kID))) {
-                            flag = true;
-                            if (tmpCategories.get(j).getCategories() == null) {
-                                ArrayList<Category> tmp = new ArrayList<Category>();
-                                tmp.add(tmpCategories.get(i));
-                                tmpCategories.get(j).setCategories(tmp);
-
-                            } else {
-                                tmpCategories.get(j).getCategories().add(tmpCategories.get(i));
-                            }
-
-                        }
-
-                    }
-
-                }
-
-                if (flag) {
-                    tmpCategories.remove(i--);
-                }
-
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return tmpCategories;
 
     }
 

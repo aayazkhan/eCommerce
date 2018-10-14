@@ -11,11 +11,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.heady.ecommerce.example.adapter.CategoryAdapter;
 import com.heady.ecommerce.example.adapter.ProductAdapter;
+import com.heady.ecommerce.example.eventHandler.CategoryOnClickListner;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
 import com.heady.ecommerce.example.model.Category;
 import com.heady.ecommerce.example.model.Product;
 import com.heady.ecommerce.example.model.Ranking;
+import com.heady.ecommerce.example.model.category.SortCategorybyChild;
 import com.heady.ecommerce.example.model.product.SortProductbyOrderCount;
 import com.heady.ecommerce.example.model.product.SortProductbyShareCount;
 import com.heady.ecommerce.example.model.product.SortProductbyViewCount;
@@ -40,15 +43,17 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.textSearch)
     EditText editsearch;
+    @BindView(R.id.cList)
+    RecyclerView cList;
     @BindViews({R.id.textView1, R.id.textView2, R.id.textView3})
     TextView[] textViews;
     @BindViews({R.id.list1, R.id.list2, R.id.list3})
     RecyclerView[] lists;
     private Unbinder unbinder;
+    private CategoryAdapter cAdapter;
     private ArrayList<Product> products[];
-    private ProductAdapter[] adapters;
-
-    private ArrayList<Category> categories;
+    private ProductAdapter[] pAdapters;
+    private ArrayList<Category> categories, hierarchyCategories, childCategories;
     private ArrayList<Ranking> rankings;
 
     @Override
@@ -60,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         toolbar.setTitle(getString(R.string.app_name));
+
+        cList.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+        cList.addItemDecoration(new DividerItemDecoration(MainActivity.this, LinearLayoutManager.HORIZONTAL));
 
         for (RecyclerView view : lists) {
             view.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
@@ -79,9 +87,38 @@ public class MainActivity extends AppCompatActivity {
 
                     getProductWithRanking();
 
-                    products = new ArrayList[rankings.size()];
+                    hierarchyCategories = new ArrayList<Category>();
+                    hierarchyCategories.addAll(categories);
+                    Collections.sort(hierarchyCategories, new SortCategorybyChild("ASC"));
+                    getHierarchyCategory(hierarchyCategories);
 
-                    adapters = new ProductAdapter[rankings.size()];
+                    childCategories = new ArrayList<Category>();
+                    childCategories.addAll(categories);
+                    getChildCategory(childCategories);
+
+                    cAdapter = new CategoryAdapter(childCategories, new CategoryOnClickListner() {
+
+                        @Override
+                        public void onItemClick(View v, int position, Category category) {
+                            System.out.println(position);
+                            if (category.getProducts().size() > 1) {
+                                Intent intent = new Intent(MainActivity.this, ProductList.class);
+                                intent.putExtra("title", category.getName());
+                                intent.putExtra("products", category.getProducts());
+                                startActivity(intent);
+                            } else {
+                                Intent intent = new Intent(MainActivity.this, ProductDetail.class);
+                                intent.putExtra("product", category.getProducts().get(0));
+                                startActivity(intent);
+                            }
+                            System.out.println("==============================");
+                        }
+                    });
+
+                    cList.setAdapter(cAdapter);
+
+                    products = new ArrayList[rankings.size()];
+                    pAdapters = new ProductAdapter[rankings.size()];
 
                     for (int i = 0; i < lists.length; i++) {
 
@@ -96,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                             Collections.sort(products[i], new SortProductbyShareCount("DESC"));
                         }
 
-                        adapters[i] = new ProductAdapter(products[i], new ProductOnClickListner() {
+                        pAdapters[i] = new ProductAdapter(products[i], new ProductOnClickListner() {
 
                             @Override
                             public void onItemClick(View v, int position, Product product) {
@@ -108,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
-                        lists[i].setAdapter(adapters[i]);
+                        lists[i].setAdapter(pAdapters[i]);
 
                     }
                 } catch (Exception e) {
@@ -148,17 +185,77 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private ArrayList<Category> getHierarchyCategory(ArrayList<Category> tmpCategories) {
+
+        try {
+            for (int i = 0; i < tmpCategories.size(); i++) {
+                boolean flag = false;
+
+                for (int j = 0; j < tmpCategories.size(); j++) {
+
+                    for (int k = 0; k < tmpCategories.get(j).getChildCategories().size(); k++) {
+                        Long iID = tmpCategories.get(i).getId();
+                        Long kID = tmpCategories.get(j).getChildCategories().get(k);
+
+                        if (String.valueOf(iID).equals(String.valueOf(kID))) {
+                            flag = true;
+                            if (tmpCategories.get(j).getCategories() == null) {
+                                ArrayList<Category> tmp = new ArrayList<Category>();
+                                tmp.add(tmpCategories.get(i));
+                                tmpCategories.get(j).setCategories(tmp);
+
+                            } else {
+                                tmpCategories.get(j).getCategories().add(tmpCategories.get(i));
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                if (flag) {
+                    tmpCategories.remove(i--);
+                }
+
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return tmpCategories;
+
+    }
+
+    private ArrayList<Category> getChildCategory(ArrayList<Category> tmpCategories) {
+
+        try {
+            for (int i = 0; i < tmpCategories.size(); i++) {
+
+                if (tmpCategories.get(i).getChildCategories().size() != 0) {
+                    tmpCategories.remove(i--);
+                }
+
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return tmpCategories;
+
+    }
+
     @OnClick(R.id.textViewCategory)
     public void onTextViewCategoryClick() {
         Intent intent = new Intent(MainActivity.this, CategoryList.class);
-        intent.putExtra("catagory", categories);
+        intent.putExtra("catagory", hierarchyCategories);
         startActivity(intent);
     }
 
     @OnTextChanged(R.id.textSearch)
     public void ontextSearch() {
         String text = editsearch.getText().toString().toLowerCase(Locale.ENGLISH);
-        for (ProductAdapter adapter : adapters) {
+        for (ProductAdapter adapter : pAdapters) {
             adapter.filter(text);
         }
     }
