@@ -7,6 +7,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     TextView[] textViews;
     @BindViews({R.id.list1, R.id.list2, R.id.list3})
     RecyclerView[] lists;
+    int devicewidth;
     private Unbinder unbinder;
     private CategoryAdapter cAdapter;
     private ArrayList<Product> products[];
@@ -74,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
             view.addItemDecoration(new DividerItemDecoration(MainActivity.this, LinearLayoutManager.HORIZONTAL));
         }
 
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+
+        devicewidth = displaymetrics.widthPixels / 3;
+        devicewidth = displaymetrics.widthPixels - devicewidth;
+
         WebServiceCalls.Data data = new WebServiceCalls(service).new Data();
 
         data.getDetails(MainActivity.this, new NetworkOperations(true) {
@@ -84,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
 
                     categories = (ArrayList<Category>) msg.getSerializable("catagory");
                     rankings = (ArrayList<Ranking>) msg.getSerializable("ranking");
-
-                    getProductWithRanking();
 
                     hierarchyCategories = new ArrayList<Category>();
                     hierarchyCategories.addAll(categories);
@@ -117,12 +123,14 @@ public class MainActivity extends AppCompatActivity {
 
                     cList.setAdapter(cAdapter);
 
+                    getProductWithRanking();
                     products = new ArrayList[rankings.size()];
                     pAdapters = new ProductAdapter[rankings.size()];
 
                     for (int i = 0; i < lists.length; i++) {
 
                         textViews[i].setText(rankings.get(i).getRanking().toUpperCase(Locale.getDefault()));
+                        textViews[i].setVisibility(View.VISIBLE);
                         products[i] = rankings.get(i).getProducts();
 
                         if (i == 0) {
@@ -133,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                             Collections.sort(products[i], new SortProductbyShareCount("DESC"));
                         }
 
-                        pAdapters[i] = new ProductAdapter(products[i], new ProductOnClickListner() {
+                        pAdapters[i] = new ProductAdapter(products[i], devicewidth, new ProductOnClickListner() {
 
                             @Override
                             public void onItemClick(View v, int position, Product product) {
@@ -162,28 +170,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getProductWithRanking() {
-
-        for (Ranking ranking : rankings) {
-            for (Product rProduct : ranking.getProducts()) {
-
-                for (Category category : categories) {
-                    for (Product cProduct : category.getProducts()) {
-                        if (rProduct.getId() == cProduct.getId()) {
-                            rProduct.setName(cProduct.getName());
-                            rProduct.setDateAdded(cProduct.getDateAdded());
-                            rProduct.setVariants(cProduct.getVariants());
-                            rProduct.setTax(cProduct.getTax());
-
-                            cProduct.setViewCount(rProduct.getViewCount());
-                            cProduct.setOrderCount(rProduct.getOrderCount());
-                            cProduct.setShareCount(rProduct.getShareCount());
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private ArrayList<Category> getHierarchyCategory(ArrayList<Category> tmpCategories) {
 
@@ -245,6 +231,33 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void getProductWithRanking() {
+
+        for (Ranking ranking : rankings) {
+            for (Product rProduct : ranking.getProducts()) {
+
+                for (Category category : childCategories) {
+
+                    for (Product cProduct : category.getProducts()) {
+
+                        if (rProduct.getId() == cProduct.getId()) {
+
+                            rProduct.setName(cProduct.getName());
+                            rProduct.setDateAdded(cProduct.getDateAdded());
+                            rProduct.setVariants(cProduct.getVariants());
+                            rProduct.setTax(cProduct.getTax());
+
+                            cProduct.setViewCount(rProduct.getViewCount());
+                            cProduct.setOrderCount(rProduct.getOrderCount());
+                            cProduct.setShareCount(rProduct.getShareCount());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     @OnClick(R.id.textViewCategory)
     public void onTextViewCategoryClick() {
         Intent intent = new Intent(MainActivity.this, CategoryList.class);
@@ -255,8 +268,15 @@ public class MainActivity extends AppCompatActivity {
     @OnTextChanged(R.id.textSearch)
     public void ontextSearch() {
         String text = editsearch.getText().toString().toLowerCase(Locale.ENGLISH);
-        for (ProductAdapter adapter : pAdapters) {
-            adapter.filter(text);
+        if (pAdapters != null) {
+            for (int i = 0; i < pAdapters.length; i++) {
+                pAdapters[i].filter(text);
+                if (pAdapters[i].getItemCount() == 0) {
+                    textViews[i].setVisibility(View.GONE);
+                } else {
+                    textViews[i].setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 

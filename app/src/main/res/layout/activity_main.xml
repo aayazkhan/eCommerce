@@ -31,7 +31,8 @@
             android:clickable="true"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Category" />
+            android:text="Category"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/textSearch"
@@ -84,7 +85,8 @@
                         android:layout_height="wrap_content"
                         android:padding="2dp"
                         android:text="Most visited"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/list1"
@@ -108,7 +110,8 @@
                         android:layout_height="wrap_content"
                         android:padding="2dp"
                         android:text="Most visited"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/list2"
@@ -132,7 +135,8 @@
                         android:layout_height="wrap_content"
                         android:padding="2dp"
                         android:text="Most visited"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/list3"

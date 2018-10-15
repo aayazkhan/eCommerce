@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -35,6 +36,8 @@ public class ProductList extends AppCompatActivity {
     private ArrayList<Product> products;
     private ProductAdapter adapter;
 
+    private int devicewidth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +48,11 @@ public class ProductList extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+
+        devicewidth = displaymetrics.widthPixels - 35;
+
         list.setLayoutManager(new LinearLayoutManager(this));
 
         savedInstanceState = getIntent().getExtras();
@@ -54,7 +62,7 @@ public class ProductList extends AppCompatActivity {
             products = (ArrayList<Product>) savedInstanceState.getSerializable("products");
             setTitle(title);
 
-            adapter = new ProductAdapter(products, new ProductOnClickListner() {
+            adapter = new ProductAdapter(products, devicewidth, new ProductOnClickListner() {
 
                 @Override
                 public void onItemClick(View v, int position, Product product) {

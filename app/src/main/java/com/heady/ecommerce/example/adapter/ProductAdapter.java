@@ -21,12 +21,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     private ArrayList<Product> products;
     private ArrayList<Product> arraylist;
 
+    private int width;
+
     private ProductOnClickListner clickListner;
 
-    public ProductAdapter(ArrayList<Product> products, ProductOnClickListner clickListner) {
+    public ProductAdapter(ArrayList<Product> products, int width, ProductOnClickListner clickListner) {
         this.products = products;
         this.arraylist = new ArrayList<Product>();
         this.arraylist.addAll(products);
+
+        this.width = width;
 
         this.clickListner = clickListner;
     }
@@ -35,6 +39,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.product_list_row, parent, false);
+
+        itemView.getLayoutParams().width = width;
 
         final MyViewHolder myViewHolder = new MyViewHolder(itemView);
 
