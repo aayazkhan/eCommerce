@@ -1,6 +1,9 @@
 package com.heady.ecommerce.example;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.heady.ecommerce.example.Utils.PopMessage;
 import com.heady.ecommerce.example.adapter.CategoryAdapter;
 import com.heady.ecommerce.example.adapter.ProductAdapter;
 import com.heady.ecommerce.example.eventHandler.CategoryOnClickListner;
@@ -82,6 +86,15 @@ public class MainActivity extends AppCompatActivity {
         devicewidth = displaymetrics.widthPixels / 3;
         devicewidth = displaymetrics.widthPixels - devicewidth;
 
+        if (isInternetOn()) {
+            downloadData();
+        } else {
+            PopMessage.makelongtoast(getApplicationContext(), "NO INTERNET CONNECTION");
+        }
+
+    }
+
+    private void downloadData() {
         WebServiceCalls.Data data = new WebServiceCalls(service).new Data();
 
         data.getDetails(MainActivity.this, new NetworkOperations(true) {
@@ -169,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
     private ArrayList<Category> getHierarchyCategory(ArrayList<Category> tmpCategories) {
 
@@ -285,4 +297,20 @@ public class MainActivity extends AppCompatActivity {
         unbinder.unbind();
         super.onDestroy();
     }
+
+    public final boolean isInternetOn() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        // ARE WE CONNECTED TO THE NET
+        if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTING || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTING || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTED) {
+            // MESSAGE TO SCREEN FOR TESTING (IF REQ)
+            // Toast.makeText(this, connectionType + ” connected”,
+            // Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
+            // System.out.println(“Not Connected”);
+            return false;
+        }
+        return false;
+    }
+
 }
