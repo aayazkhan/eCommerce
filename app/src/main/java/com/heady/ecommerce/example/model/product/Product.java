@@ -1,8 +1,10 @@
 
-package com.heady.ecommerce.example.model;
+package com.heady.ecommerce.example.model.product;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.heady.ecommerce.example.model.Tax;
+import com.heady.ecommerce.example.model.Variant;
 
 import java.io.Serializable;
 import java.util.ArrayList;

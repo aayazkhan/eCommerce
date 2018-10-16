@@ -1,6 +1,6 @@
-package com.heady.ecommerce.example.model.category;
+package com.heady.ecommerce.example.model.category.Comparator;
 
-import com.heady.ecommerce.example.model.Category;
+import com.heady.ecommerce.example.model.category.Category;
 
 import java.util.ArrayList;
 import java.util.Comparator;

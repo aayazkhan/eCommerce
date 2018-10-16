@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.heady.ecommerce.example.R;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
-import com.heady.ecommerce.example.model.Product;
+import com.heady.ecommerce.example.model.product.Product;
 
 import java.util.ArrayList;
 import java.util.Locale;

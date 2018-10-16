@@ -2,6 +2,7 @@
 package com.heady.ecommerce.example.model;
 
 import com.google.gson.annotations.Expose;
+import com.heady.ecommerce.example.model.product.Product;
 
 import java.io.Serializable;
 import java.util.ArrayList;

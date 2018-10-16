@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.heady.ecommerce.example.R;
 import com.heady.ecommerce.example.customControl.CustExpListview;
-import com.heady.ecommerce.example.model.Category;
+import com.heady.ecommerce.example.model.category.Category;
 
 import java.util.ArrayList;
 

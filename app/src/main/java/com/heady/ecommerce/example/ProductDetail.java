@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import com.heady.ecommerce.example.adapter.VariantAdapter;
 import com.heady.ecommerce.example.eventHandler.VariantOnClickListner;
-import com.heady.ecommerce.example.model.Product;
 import com.heady.ecommerce.example.model.Variant;
+import com.heady.ecommerce.example.model.product.Product;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

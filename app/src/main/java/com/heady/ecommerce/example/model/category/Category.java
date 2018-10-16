@@ -1,8 +1,9 @@
 
-package com.heady.ecommerce.example.model;
+package com.heady.ecommerce.example.model.category;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.heady.ecommerce.example.model.product.Product;
 
 import java.io.Serializable;
 import java.util.ArrayList;

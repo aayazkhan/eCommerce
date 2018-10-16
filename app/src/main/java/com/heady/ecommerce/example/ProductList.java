@@ -13,7 +13,7 @@ import android.widget.EditText;
 
 import com.heady.ecommerce.example.adapter.ProductAdapter;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
-import com.heady.ecommerce.example.model.Product;
+import com.heady.ecommerce.example.model.product.Product;
 
 import java.util.ArrayList;
 import java.util.Locale;

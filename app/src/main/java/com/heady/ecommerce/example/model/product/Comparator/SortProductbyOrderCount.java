@@ -1,6 +1,6 @@
-package com.heady.ecommerce.example.model.product;
+package com.heady.ecommerce.example.model.product.Comparator;
 
-import com.heady.ecommerce.example.model.Product;
+import com.heady.ecommerce.example.model.product.Product;
 
 import java.util.Comparator;
 
