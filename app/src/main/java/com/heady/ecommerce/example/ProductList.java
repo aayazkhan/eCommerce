@@ -14,6 +14,8 @@ import android.widget.EditText;
 import com.heady.ecommerce.example.adapter.ProductAdapter;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
 import com.heady.ecommerce.example.model.product.Product;
+import com.heady.ecommerce.example.presenter.productlist.ProductListlPresenter;
+import com.heady.ecommerce.example.view.IProductListView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -23,7 +25,7 @@ import butterknife.ButterKnife;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 
-public class ProductList extends AppCompatActivity {
+public class ProductList extends AppCompatActivity implements IProductListView {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -37,6 +39,9 @@ public class ProductList extends AppCompatActivity {
     private ProductAdapter adapter;
 
     private int devicewidth;
+
+    private ProductListlPresenter productListlPresenter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,23 +67,31 @@ public class ProductList extends AppCompatActivity {
             products = (ArrayList<Product>) savedInstanceState.getSerializable("products");
             setTitle(title);
 
-            adapter = new ProductAdapter(products, devicewidth, new ProductOnClickListner() {
-
-                @Override
-                public void onItemClick(View v, int position, Product product) {
-                    System.out.println(position);
-
-                    Intent intent = new Intent(ProductList.this, ProductDetail.class);
-                    intent.putExtra("product", product);
-                    startActivity(intent);
-
-                    System.out.println("==============================");
-                }
-            });
-
-            list.setAdapter(adapter);
+            productListlPresenter = new ProductListlPresenter(this, products);
+            productListlPresenter.showProductsDetails();
 
         }
+    }
+
+    @Override
+    public void showProductsDetails(ArrayList<Product> product) {
+
+        adapter = new ProductAdapter(products, devicewidth, new ProductOnClickListner() {
+
+            @Override
+            public void onItemClick(View v, int position, Product product) {
+                System.out.println(position);
+
+                Intent intent = new Intent(ProductList.this, ProductDetail.class);
+                intent.putExtra("product", product);
+                startActivity(intent);
+
+                System.out.println("==============================");
+            }
+        });
+
+        list.setAdapter(adapter);
+
     }
 
     @OnTextChanged(R.id.textSearch)

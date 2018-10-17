@@ -79,9 +79,42 @@
 
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/textColorSizeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="10dp"
+        android:text="Color / Size :"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/vList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="TAX :"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textTex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="VAT : 12.5 %" />
+
+    </LinearLayout>
 
 </LinearLayout>

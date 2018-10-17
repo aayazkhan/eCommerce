@@ -2,6 +2,7 @@ package com.heady.ecommerce.example;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -29,6 +30,8 @@ import com.heady.ecommerce.example.model.product.Comparator.SortProductbyViewCou
 import com.heady.ecommerce.example.model.product.Product;
 import com.heady.ecommerce.example.network.NetworkOperations;
 import com.heady.ecommerce.example.network.WebServiceCalls;
+import com.heady.ecommerce.example.presenter.mainactivity.MainActivityPresenter;
+import com.heady.ecommerce.example.view.IMainActivityView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +44,7 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IMainActivityView {
 
     public static String service = "https://stark-spire-93433.herokuapp.com/";
     @BindView(R.id.toolbar)
@@ -54,13 +57,15 @@ public class MainActivity extends AppCompatActivity {
     TextView[] textViews;
     @BindViews({R.id.list1, R.id.list2, R.id.list3})
     RecyclerView[] lists;
-    int devicewidth;
+    int itemWidthHieght;
     private Unbinder unbinder;
     private CategoryAdapter cAdapter;
     private ArrayList<Product> products[];
     private ProductAdapter[] pAdapters;
-    private ArrayList<Category> categories, hierarchyCategories, childCategories;
-    private ArrayList<Ranking> rankings;
+    private ArrayList<Category> categories, hierarchyCategories;
+
+    private MainActivityPresenter mainActivityPresenter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +88,13 @@ public class MainActivity extends AppCompatActivity {
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 
-        devicewidth = displaymetrics.widthPixels / 3;
-        devicewidth = displaymetrics.widthPixels - devicewidth;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            itemWidthHieght = displaymetrics.widthPixels / 3;
+            itemWidthHieght = displaymetrics.widthPixels - itemWidthHieght;
+        } else {
+            itemWidthHieght = displaymetrics.heightPixels / 3;
+            itemWidthHieght = displaymetrics.heightPixels - itemWidthHieght;
+        }
 
         if (isInternetOn()) {
             downloadData();
@@ -104,71 +114,19 @@ public class MainActivity extends AppCompatActivity {
                 try {
 
                     categories = (ArrayList<Category>) msg.getSerializable("catagory");
-                    rankings = (ArrayList<Ranking>) msg.getSerializable("ranking");
+                    ArrayList<Ranking> rankings = (ArrayList<Ranking>) msg.getSerializable("ranking");
 
-                    hierarchyCategories = new ArrayList<Category>();
-                    hierarchyCategories.addAll(categories);
-                    Collections.sort(hierarchyCategories, new SortCategorybyChild("ASC"));
-                    getHierarchyCategory(hierarchyCategories);
+                    hierarchyCategories = getHierarchyCategory();
 
-                    childCategories = new ArrayList<Category>();
-                    childCategories.addAll(categories);
-                    getChildCategory(childCategories);
+                    ArrayList<Category> childCategories = getChildCategory(categories);
 
-                    cAdapter = new CategoryAdapter(childCategories, new CategoryOnClickListner() {
+                    rankings = getProductWithRanking(childCategories, rankings);
 
-                        @Override
-                        public void onItemClick(View v, int position, Category category) {
-                            System.out.println(position);
-                            if (category.getProducts().size() > 1) {
-                                Intent intent = new Intent(MainActivity.this, ProductList.class);
-                                intent.putExtra("title", category.getName());
-                                intent.putExtra("products", category.getProducts());
-                                startActivity(intent);
-                            } else {
-                                Intent intent = new Intent(MainActivity.this, ProductDetail.class);
-                                intent.putExtra("product", category.getProducts().get(0));
-                                startActivity(intent);
-                            }
-                            System.out.println("==============================");
-                        }
-                    });
+                    mainActivityPresenter = new MainActivityPresenter(MainActivity.this, childCategories, rankings);
+                    mainActivityPresenter.showChildCategoriesDetails();
+                    mainActivityPresenter.showRankingDetails();
 
-                    cList.setAdapter(cAdapter);
 
-                    getProductWithRanking();
-                    products = new ArrayList[rankings.size()];
-                    pAdapters = new ProductAdapter[rankings.size()];
-
-                    for (int i = 0; i < lists.length; i++) {
-
-                        textViews[i].setText(rankings.get(i).getRanking().toUpperCase(Locale.getDefault()));
-                        textViews[i].setVisibility(View.VISIBLE);
-                        products[i] = rankings.get(i).getProducts();
-
-                        if (i == 0) {
-                            Collections.sort(products[i], new SortProductbyViewCount("DESC"));
-                        } else if (i == 1) {
-                            Collections.sort(products[i], new SortProductbyOrderCount("DESC"));
-                        } else if (i == 2) {
-                            Collections.sort(products[i], new SortProductbyShareCount("DESC"));
-                        }
-
-                        pAdapters[i] = new ProductAdapter(products[i], devicewidth, new ProductOnClickListner() {
-
-                            @Override
-                            public void onItemClick(View v, int position, Product product) {
-                                System.out.println(position);
-                                Intent intent = new Intent(MainActivity.this, ProductDetail.class);
-                                intent.putExtra("product", product);
-                                startActivity(intent);
-                                System.out.println("==============================");
-                            }
-                        });
-
-                        lists[i].setAdapter(pAdapters[i]);
-
-                    }
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -183,27 +141,32 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private ArrayList<Category> getHierarchyCategory(ArrayList<Category> tmpCategories) {
+    private ArrayList<Category> getHierarchyCategory() {
+
+        ArrayList<Category> hierarchyCategories = new ArrayList<Category>();
+        hierarchyCategories.addAll(categories);
+        Collections.sort(hierarchyCategories, new SortCategorybyChild("ASC"));
 
         try {
-            for (int i = 0; i < tmpCategories.size(); i++) {
+
+            for (int i = 0; i < hierarchyCategories.size(); i++) {
                 boolean flag = false;
 
-                for (int j = 0; j < tmpCategories.size(); j++) {
+                for (int j = 0; j < hierarchyCategories.size(); j++) {
 
-                    for (int k = 0; k < tmpCategories.get(j).getChildCategories().size(); k++) {
-                        Long iID = tmpCategories.get(i).getId();
-                        Long kID = tmpCategories.get(j).getChildCategories().get(k);
+                    for (int k = 0; k < hierarchyCategories.get(j).getChildCategories().size(); k++) {
+                        Long iID = hierarchyCategories.get(i).getId();
+                        Long kID = hierarchyCategories.get(j).getChildCategories().get(k);
 
                         if (String.valueOf(iID).equals(String.valueOf(kID))) {
                             flag = true;
-                            if (tmpCategories.get(j).getCategories() == null) {
+                            if (hierarchyCategories.get(j).getCategories() == null) {
                                 ArrayList<Category> tmp = new ArrayList<Category>();
-                                tmp.add(tmpCategories.get(i));
-                                tmpCategories.get(j).setCategories(tmp);
+                                tmp.add(hierarchyCategories.get(i));
+                                hierarchyCategories.get(j).setCategories(tmp);
 
                             } else {
-                                tmpCategories.get(j).getCategories().add(tmpCategories.get(i));
+                                hierarchyCategories.get(j).getCategories().add(hierarchyCategories.get(i));
                             }
 
                         }
@@ -213,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (flag) {
-                    tmpCategories.remove(i--);
+                    hierarchyCategories.remove(i--);
                 }
 
             }
@@ -221,11 +184,14 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(e);
         }
 
-        return tmpCategories;
+        return hierarchyCategories;
 
     }
 
     private ArrayList<Category> getChildCategory(ArrayList<Category> tmpCategories) {
+
+        ArrayList<Category> childCategories = new ArrayList<Category>();
+        childCategories.addAll(categories);
 
         try {
             for (int i = 0; i < tmpCategories.size(); i++) {
@@ -243,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getProductWithRanking() {
+    private ArrayList<Ranking> getProductWithRanking(ArrayList<Category> childCategories, ArrayList<Ranking> rankings) {
 
         for (Ranking ranking : rankings) {
             for (Product rProduct : ranking.getProducts()) {
@@ -267,8 +233,71 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        return rankings;
     }
 
+    @Override
+    public void showChildCategoriesDetails(ArrayList<Category> childCategories) {
+
+        cAdapter = new CategoryAdapter(childCategories, new CategoryOnClickListner() {
+
+            @Override
+            public void onItemClick(View v, int position, Category category) {
+                System.out.println(position);
+                if (category.getProducts().size() > 1) {
+                    Intent intent = new Intent(MainActivity.this, ProductList.class);
+                    intent.putExtra("title", category.getName());
+                    intent.putExtra("products", category.getProducts());
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MainActivity.this, ProductDetail.class);
+                    intent.putExtra("product", category.getProducts().get(0));
+                    startActivity(intent);
+                }
+                System.out.println("==============================");
+            }
+        });
+
+        cList.setAdapter(cAdapter);
+
+    }
+
+    @Override
+    public void showRankingDetails(ArrayList<Ranking> rankings) {
+        products = new ArrayList[rankings.size()];
+        pAdapters = new ProductAdapter[rankings.size()];
+
+        for (int i = 0; i < lists.length; i++) {
+
+            textViews[i].setText(rankings.get(i).getRanking().toUpperCase(Locale.getDefault()));
+            textViews[i].setVisibility(View.VISIBLE);
+            products[i] = rankings.get(i).getProducts();
+
+            if (i == 0) {
+                Collections.sort(products[i], new SortProductbyViewCount("DESC"));
+            } else if (i == 1) {
+                Collections.sort(products[i], new SortProductbyOrderCount("DESC"));
+            } else if (i == 2) {
+                Collections.sort(products[i], new SortProductbyShareCount("DESC"));
+            }
+
+            pAdapters[i] = new ProductAdapter(products[i], itemWidthHieght, new ProductOnClickListner() {
+
+                @Override
+                public void onItemClick(View v, int position, Product product) {
+                    System.out.println(position);
+                    Intent intent = new Intent(MainActivity.this, ProductDetail.class);
+                    intent.putExtra("product", product);
+                    startActivity(intent);
+                    System.out.println("==============================");
+                }
+            });
+
+            lists[i].setAdapter(pAdapters[i]);
+        }
+
+    }
 
     @OnClick(R.id.textViewCategory)
     public void onTextViewCategoryClick() {
