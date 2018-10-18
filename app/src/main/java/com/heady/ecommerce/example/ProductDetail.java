@@ -12,10 +12,13 @@ import android.widget.TextView;
 
 import com.heady.ecommerce.example.adapter.VariantAdapter;
 import com.heady.ecommerce.example.eventHandler.VariantOnClickListner;
+import com.heady.ecommerce.example.model.Tax;
 import com.heady.ecommerce.example.model.Variant;
 import com.heady.ecommerce.example.model.product.Product;
 import com.heady.ecommerce.example.presenter.productdetail.ProductDetailPresenter;
 import com.heady.ecommerce.example.view.IProductDetailView;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,7 +45,6 @@ public class ProductDetail extends AppCompatActivity implements IProductDetailVi
     @BindView(R.id.textTex)
     TextView textTex;
     private Unbinder unbinder;
-    private Product product;
     private VariantAdapter vAdapter;
 
     private ProductDetailPresenter productDetailPresenter;
@@ -60,48 +62,67 @@ public class ProductDetail extends AppCompatActivity implements IProductDetailVi
         savedInstanceState = getIntent().getExtras();
 
         if (savedInstanceState != null) {
-            product = (Product) savedInstanceState.getSerializable("product");
+            Product product = (Product) savedInstanceState.getSerializable("product");
             setTitle(product.getName());
 
             productDetailPresenter = new ProductDetailPresenter(this, product);
 
-            productDetailPresenter.showProductDetail();
 
         }
     }
 
     @Override
-    public void showProductDetails(Product product) {
-        textProductName.setText(product.getName());
+    public void showProductName(String productName) {
+        textProductName.setText(productName);
+    }
 
-        textPrice.setText("Rs. " + product.getVariants().get(0).getPrice());
+    @Override
+    public void showPrice(Long price) {
+        textPrice.setText("Rs. " + price);
+    }
 
-        textColor.setText(product.getVariants().get(0).getColor());
+    @Override
+    public void showColor(String color) {
+        textColor.setText(color);
+    }
 
-        if (product.getVariants().get(0).getSize() != null) {
-            textSize.setText("Size " + product.getVariants().get(0).getSize());
-            textColorSizeTitle.setText("Color / Size :");
+    @Override
+    public void showSize(Long size) {
+        if (size != null) {
+            textSize.setText("Size " + size);
         } else {
             textSize.setVisibility(View.GONE);
-            textColorSizeTitle.setText("Color :");
         }
+    }
 
-        if (product.getViewCount() > product.getOrderCount()) {
-            if (product.getViewCount() > product.getShareCount()) {
-                textCount.setText(product.getViewCount() + " views");
+
+    @Override
+    public void showCount(Long viewCount, Long orderedCount, Long shareCount) {
+        if (viewCount > orderedCount) {
+            if (viewCount > shareCount) {
+                textCount.setText(viewCount + " views");
             } else {
-                textCount.setText(product.getShareCount() + " shares");
+                textCount.setText(shareCount + " shares");
             }
-        } else if (product.getOrderCount() > product.getShareCount()) {
-            textCount.setText(product.getOrderCount() + " ordered");
+        } else if (orderedCount > shareCount) {
+            textCount.setText(orderedCount + " ordered");
         } else {
-            textCount.setText(product.getShareCount() + " shares");
+            textCount.setText(shareCount + " shares");
         }
+    }
 
+    @Override
+    public void showColorSizeTitle(String colorSizeTitle) {
+        textColorSizeTitle.setText(colorSizeTitle);
+    }
+
+
+    @Override
+    public void showVariant(ArrayList<Variant> variants) {
         vList.setLayoutManager(new LinearLayoutManager(ProductDetail.this, LinearLayoutManager.HORIZONTAL, false));
         vList.addItemDecoration(new DividerItemDecoration(ProductDetail.this, LinearLayoutManager.HORIZONTAL));
 
-        vAdapter = new VariantAdapter(product.getVariants(), new VariantOnClickListner() {
+        vAdapter = new VariantAdapter(variants, new VariantOnClickListner() {
             @Override
             public void onItemClick(View v, int position, Variant variant) {
 
@@ -118,7 +139,11 @@ public class ProductDetail extends AppCompatActivity implements IProductDetailVi
         });
 
         vList.setAdapter(vAdapter);
-        textTex.setText(product.getTax().getName() + " : " + product.getTax().getValue() + " %");
+    }
+
+    @Override
+    public void showTax(Tax tax) {
+        textTex.setText(tax.getName() + " : " + tax.getValue() + " %");
     }
 
     @Override

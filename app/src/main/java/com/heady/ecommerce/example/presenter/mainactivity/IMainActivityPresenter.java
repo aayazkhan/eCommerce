@@ -6,8 +6,5 @@ package com.heady.ecommerce.example.presenter.mainactivity;
 
 public interface IMainActivityPresenter {
 
-    void showChildCategoriesDetails();
-
-    void showRankingDetails();
 
 }

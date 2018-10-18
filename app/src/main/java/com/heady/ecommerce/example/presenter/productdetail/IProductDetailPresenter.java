@@ -6,6 +6,5 @@ package com.heady.ecommerce.example.presenter.productdetail;
 
 public interface IProductDetailPresenter {
 
-    void showProductDetail();
 
 }

@@ -11,8 +11,9 @@ import java.util.ArrayList;
 
 public interface IMainActivityView {
 
+    void setHierarchyCategories(ArrayList<Category> hierarchyCategories);
     void showChildCategoriesDetails(ArrayList<Category> childCategories);
-
     void showRankingDetails(ArrayList<Ranking> rankings);
+
 
 }

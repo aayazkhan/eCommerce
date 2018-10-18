@@ -23,7 +23,6 @@ import com.heady.ecommerce.example.eventHandler.CategoryOnClickListner;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
 import com.heady.ecommerce.example.model.Ranking;
 import com.heady.ecommerce.example.model.category.Category;
-import com.heady.ecommerce.example.model.category.Comparator.SortCategorybyChild;
 import com.heady.ecommerce.example.model.product.Comparator.SortProductbyOrderCount;
 import com.heady.ecommerce.example.model.product.Comparator.SortProductbyShareCount;
 import com.heady.ecommerce.example.model.product.Comparator.SortProductbyViewCount;
@@ -116,15 +115,7 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
                     categories = (ArrayList<Category>) msg.getSerializable("catagory");
                     ArrayList<Ranking> rankings = (ArrayList<Ranking>) msg.getSerializable("ranking");
 
-                    hierarchyCategories = getHierarchyCategory();
-
-                    ArrayList<Category> childCategories = getChildCategory(categories);
-
-                    rankings = getProductWithRanking(childCategories, rankings);
-
-                    mainActivityPresenter = new MainActivityPresenter(MainActivity.this, childCategories, rankings);
-                    mainActivityPresenter.showChildCategoriesDetails();
-                    mainActivityPresenter.showRankingDetails();
+                    mainActivityPresenter = new MainActivityPresenter(MainActivity.this, categories, rankings);
 
 
                 } catch (Exception e) {
@@ -141,100 +132,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
 
     }
 
-    private ArrayList<Category> getHierarchyCategory() {
-
-        ArrayList<Category> hierarchyCategories = new ArrayList<Category>();
-        hierarchyCategories.addAll(categories);
-        Collections.sort(hierarchyCategories, new SortCategorybyChild("ASC"));
-
-        try {
-
-            for (int i = 0; i < hierarchyCategories.size(); i++) {
-                boolean flag = false;
-
-                for (int j = 0; j < hierarchyCategories.size(); j++) {
-
-                    for (int k = 0; k < hierarchyCategories.get(j).getChildCategories().size(); k++) {
-                        Long iID = hierarchyCategories.get(i).getId();
-                        Long kID = hierarchyCategories.get(j).getChildCategories().get(k);
-
-                        if (String.valueOf(iID).equals(String.valueOf(kID))) {
-                            flag = true;
-                            if (hierarchyCategories.get(j).getCategories() == null) {
-                                ArrayList<Category> tmp = new ArrayList<Category>();
-                                tmp.add(hierarchyCategories.get(i));
-                                hierarchyCategories.get(j).setCategories(tmp);
-
-                            } else {
-                                hierarchyCategories.get(j).getCategories().add(hierarchyCategories.get(i));
-                            }
-
-                        }
-
-                    }
-
-                }
-
-                if (flag) {
-                    hierarchyCategories.remove(i--);
-                }
-
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return hierarchyCategories;
-
-    }
-
-    private ArrayList<Category> getChildCategory(ArrayList<Category> tmpCategories) {
-
-        ArrayList<Category> childCategories = new ArrayList<Category>();
-        childCategories.addAll(categories);
-
-        try {
-            for (int i = 0; i < tmpCategories.size(); i++) {
-
-                if (tmpCategories.get(i).getChildCategories().size() != 0) {
-                    tmpCategories.remove(i--);
-                }
-
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return tmpCategories;
-
-    }
-
-    private ArrayList<Ranking> getProductWithRanking(ArrayList<Category> childCategories, ArrayList<Ranking> rankings) {
-
-        for (Ranking ranking : rankings) {
-            for (Product rProduct : ranking.getProducts()) {
-
-                for (Category category : childCategories) {
-
-                    for (Product cProduct : category.getProducts()) {
-
-                        if (rProduct.getId() == cProduct.getId()) {
-
-                            rProduct.setName(cProduct.getName());
-                            rProduct.setDateAdded(cProduct.getDateAdded());
-                            rProduct.setVariants(cProduct.getVariants());
-                            rProduct.setTax(cProduct.getTax());
-
-                            cProduct.setViewCount(rProduct.getViewCount());
-                            cProduct.setOrderCount(rProduct.getOrderCount());
-                            cProduct.setShareCount(rProduct.getShareCount());
-                        }
-                    }
-                }
-            }
-        }
-
-        return rankings;
+    @Override
+    public void setHierarchyCategories(ArrayList<Category> hierarchyCategories) {
+        this.hierarchyCategories = hierarchyCategories;
     }
 
     @Override
