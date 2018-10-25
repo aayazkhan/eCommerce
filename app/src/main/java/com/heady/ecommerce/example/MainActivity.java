@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,21 +20,23 @@ import android.widget.TextView;
 import com.heady.ecommerce.example.Utils.PopMessage;
 import com.heady.ecommerce.example.adapter.CategoryAdapter;
 import com.heady.ecommerce.example.adapter.ProductAdapter;
+import com.heady.ecommerce.example.db.entity.Ranking;
+import com.heady.ecommerce.example.db.entity.category.Category;
+import com.heady.ecommerce.example.db.entity.product.Comparator.SortProductbyOrderCount;
+import com.heady.ecommerce.example.db.entity.product.Comparator.SortProductbyShareCount;
+import com.heady.ecommerce.example.db.entity.product.Comparator.SortProductbyViewCount;
+import com.heady.ecommerce.example.db.entity.product.Product;
 import com.heady.ecommerce.example.eventHandler.CategoryOnClickListner;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
-import com.heady.ecommerce.example.model.Ranking;
-import com.heady.ecommerce.example.model.category.Category;
-import com.heady.ecommerce.example.model.product.Comparator.SortProductbyOrderCount;
-import com.heady.ecommerce.example.model.product.Comparator.SortProductbyShareCount;
-import com.heady.ecommerce.example.model.product.Comparator.SortProductbyViewCount;
-import com.heady.ecommerce.example.model.product.Product;
 import com.heady.ecommerce.example.network.NetworkOperations;
 import com.heady.ecommerce.example.network.WebServiceCalls;
 import com.heady.ecommerce.example.presenter.mainactivity.MainActivityPresenter;
+import com.heady.ecommerce.example.service.serviceImpl.DatabaseServiceImpl;
 import com.heady.ecommerce.example.view.IMainActivityView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -56,15 +59,18 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
     TextView[] textViews;
     @BindViews({R.id.list1, R.id.list2, R.id.list3})
     RecyclerView[] lists;
+
     int itemWidthHieght;
+
     private Unbinder unbinder;
     private CategoryAdapter cAdapter;
     private ArrayList<Product> products[];
     private ProductAdapter[] pAdapters;
-    private ArrayList<Category> categories, hierarchyCategories;
+    private ArrayList<Category> hierarchyCategories;
 
     private MainActivityPresenter mainActivityPresenter;
 
+    private DatabaseServiceImpl databaseService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +85,10 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
         cList.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
         cList.addItemDecoration(new DividerItemDecoration(MainActivity.this, LinearLayoutManager.HORIZONTAL));
 
-        for (RecyclerView view : lists) {
-            view.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            view.addItemDecoration(new DividerItemDecoration(MainActivity.this, LinearLayoutManager.HORIZONTAL));
+        for (RecyclerView list : lists) {
+            list.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+            list.setItemAnimator(new DefaultItemAnimator());
+
         }
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -95,10 +102,24 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
             itemWidthHieght = displaymetrics.heightPixels - itemWidthHieght;
         }
 
+        databaseService = new DatabaseServiceImpl(MainActivity.this);
+
         if (isInternetOn()) {
             downloadData();
         } else {
             PopMessage.makelongtoast(getApplicationContext(), "NO INTERNET CONNECTION");
+
+            List<Category> tmpCategories = databaseService.getCategoryAll();
+            List<Ranking> tmpRankings = databaseService.getRankingAll();
+
+            ArrayList<Category> categories = new ArrayList<Category>();
+            ArrayList<Ranking> rankings = new ArrayList<Ranking>();
+
+            categories.addAll(tmpCategories);
+            rankings.addAll(tmpRankings);
+
+            mainActivityPresenter = new MainActivityPresenter(MainActivity.this, categories, rankings);
+
         }
 
     }
@@ -112,8 +133,11 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
                 System.out.println(msg);
                 try {
 
-                    categories = (ArrayList<Category>) msg.getSerializable("catagory");
+                    ArrayList<Category> categories = (ArrayList<Category>) msg.getSerializable("catagory");
                     ArrayList<Ranking> rankings = (ArrayList<Ranking>) msg.getSerializable("ranking");
+
+                    databaseService.insertCategoryAll(categories);
+                    databaseService.insertRankingAll(rankings);
 
                     mainActivityPresenter = new MainActivityPresenter(MainActivity.this, categories, rankings);
 
@@ -230,12 +254,16 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
     public final boolean isInternetOn() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         // ARE WE CONNECTED TO THE NET
-        if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTING || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTING || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTED) {
+        if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.CONNECTING ||
+                connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTING ||
+                connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.CONNECTED) {
             // MESSAGE TO SCREEN FOR TESTING (IF REQ)
             // Toast.makeText(this, connectionType + ” connected”,
             // Toast.LENGTH_SHORT).show();
             return true;
-        } else if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED || connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
+        } else if (connectivityManager.getNetworkInfo(0).getState() == NetworkInfo.State.DISCONNECTED ||
+                connectivityManager.getNetworkInfo(1).getState() == NetworkInfo.State.DISCONNECTED) {
             // System.out.println(“Not Connected”);
             return false;
         }

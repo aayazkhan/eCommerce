@@ -3,6 +3,7 @@ package com.heady.ecommerce.example;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -12,8 +13,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.heady.ecommerce.example.adapter.ProductAdapter;
+import com.heady.ecommerce.example.db.entity.product.Product;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
-import com.heady.ecommerce.example.model.product.Product;
 import com.heady.ecommerce.example.presenter.productlist.ProductListlPresenter;
 import com.heady.ecommerce.example.view.IProductListView;
 
@@ -59,6 +60,7 @@ public class ProductList extends AppCompatActivity implements IProductListView {
         devicewidth = displaymetrics.widthPixels - 35;
 
         list.setLayoutManager(new LinearLayoutManager(this));
+        list.setItemAnimator(new DefaultItemAnimator());
 
         savedInstanceState = getIntent().getExtras();
 

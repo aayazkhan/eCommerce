@@ -1,9 +1,9 @@
 package com.heady.ecommerce.example.presenter.mainactivity;
 
-import com.heady.ecommerce.example.model.Ranking;
-import com.heady.ecommerce.example.model.category.Category;
-import com.heady.ecommerce.example.model.category.Comparator.SortCategorybyChild;
-import com.heady.ecommerce.example.model.product.Product;
+import com.heady.ecommerce.example.db.entity.Ranking;
+import com.heady.ecommerce.example.db.entity.category.Category;
+import com.heady.ecommerce.example.db.entity.category.Comparator.SortCategorybyChild;
+import com.heady.ecommerce.example.db.entity.product.Product;
 import com.heady.ecommerce.example.view.IMainActivityView;
 
 import java.util.ArrayList;

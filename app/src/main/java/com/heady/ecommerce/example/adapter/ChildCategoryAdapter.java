@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.heady.ecommerce.example.ProductDetail;
 import com.heady.ecommerce.example.ProductList;
 import com.heady.ecommerce.example.R;
-import com.heady.ecommerce.example.model.category.Category;
+import com.heady.ecommerce.example.db.entity.category.Category;
 
 import java.util.ArrayList;
 

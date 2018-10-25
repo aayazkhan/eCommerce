@@ -1,7 +1,7 @@
 package com.heady.ecommerce.example.view;
 
-import com.heady.ecommerce.example.model.Ranking;
-import com.heady.ecommerce.example.model.category.Category;
+import com.heady.ecommerce.example.db.entity.Ranking;
+import com.heady.ecommerce.example.db.entity.category.Category;
 
 import java.util.ArrayList;
 

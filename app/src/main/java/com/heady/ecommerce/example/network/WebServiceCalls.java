@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.heady.ecommerce.example.Utils.Utility;
-import com.heady.ecommerce.example.model.Ranking;
-import com.heady.ecommerce.example.model.category.Category;
+import com.heady.ecommerce.example.db.entity.Ranking;
+import com.heady.ecommerce.example.db.entity.category.Category;
 import com.heady.ecommerce.example.network.Retrofit.RFInterface;
 import com.heady.ecommerce.example.network.Retrofit.ResponseModels.RmData;
 

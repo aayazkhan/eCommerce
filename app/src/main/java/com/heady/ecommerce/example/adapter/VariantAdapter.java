@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.heady.ecommerce.example.R;
+import com.heady.ecommerce.example.db.entity.Variant;
 import com.heady.ecommerce.example.eventHandler.VariantOnClickListner;
-import com.heady.ecommerce.example.model.Variant;
 
 import java.util.ArrayList;
 

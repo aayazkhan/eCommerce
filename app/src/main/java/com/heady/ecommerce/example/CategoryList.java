@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
 import com.heady.ecommerce.example.adapter.ParentCategoryAdapter;
-import com.heady.ecommerce.example.model.category.Category;
+import com.heady.ecommerce.example.db.entity.category.Category;
 
 import java.util.ArrayList;
 

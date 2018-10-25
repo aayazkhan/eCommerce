@@ -1,6 +1,6 @@
 package com.heady.ecommerce.example.presenter.productlist;
 
-import com.heady.ecommerce.example.model.product.Product;
+import com.heady.ecommerce.example.db.entity.product.Product;
 import com.heady.ecommerce.example.view.IProductListView;
 
 import java.util.ArrayList;

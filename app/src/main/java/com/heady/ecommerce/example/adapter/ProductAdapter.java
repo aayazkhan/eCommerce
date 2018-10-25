@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.heady.ecommerce.example.R;
+import com.heady.ecommerce.example.db.entity.product.Product;
 import com.heady.ecommerce.example.eventHandler.ProductOnClickListner;
-import com.heady.ecommerce.example.model.product.Product;
 
 import java.util.ArrayList;
 import java.util.Locale;

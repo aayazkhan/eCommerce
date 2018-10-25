@@ -1,7 +1,7 @@
 package com.heady.ecommerce.example.view;
 
-import com.heady.ecommerce.example.model.Tax;
-import com.heady.ecommerce.example.model.Variant;
+import com.heady.ecommerce.example.db.entity.Tax;
+import com.heady.ecommerce.example.db.entity.Variant;
 
 import java.util.ArrayList;
 

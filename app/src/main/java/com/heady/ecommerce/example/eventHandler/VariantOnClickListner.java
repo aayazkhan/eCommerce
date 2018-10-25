@@ -2,7 +2,7 @@ package com.heady.ecommerce.example.eventHandler;
 
 import android.view.View;
 
-import com.heady.ecommerce.example.model.Variant;
+import com.heady.ecommerce.example.db.entity.Variant;
 
 /**
  * Created by Ronil on 07-09-2017.
